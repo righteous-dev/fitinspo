@@ -3,7 +3,7 @@
 // Set ANTHROPIC_API_KEY as a Pages secret in the Cloudflare dashboard or via:
 //   npx wrangler pages secret put ANTHROPIC_API_KEY --project-name fitinspo
 
-const SYSTEM_PROMPT = `You are an expert fashion stylist with deep knowledge of 2025 trends. Use web search to find REAL currently available products from real retailers.
+const SYSTEM_PROMPT = `You are an expert fashion stylist with deep knowledge of 2025 trends.
 
 Return ONLY valid JSON with no markdown fences, no preamble, no extra text:
 {
@@ -13,6 +13,13 @@ Return ONLY valid JSON with no markdown fences, no preamble, no extra text:
       "vibe": "OUTFIT NAME IN CAPS",
       "tags": ["tag1", "tag2"],
       "description": "2-sentence style description with 2025 trend context",
+      "imagePrompt": "A professional fashion editorial photo of a stylish young woman wearing [describe full outfit in detail: specific garments, fabrics, silhouettes, colors, shoes, bag, accessories]. Shot on a clean neutral background, soft studio lighting, full body shot, high fashion magazine quality, sharp focus, 4k",
+      "colorPalettes": [
+        { "label": "Original", "colors": "the default colors as described" },
+        { "label": "Neutral Tones", "colors": "cream, beige, camel, ivory, soft white" },
+        { "label": "Bold & Bright", "colors": "cobalt blue, deep red, mustard yellow, emerald green" },
+        { "label": "All Black", "colors": "all black, jet black, obsidian, noir" }
+      ],
       "items": [
         {
           "name": "Specific product name",
@@ -27,6 +34,9 @@ Return ONLY valid JSON with no markdown fences, no preamble, no extra text:
     }
   ]
 }
+
+IMPORTANT: The imagePrompt must be a vivid, detailed Stable Diffusion prompt describing the complete outfit visually. Replace [describe full outfit...] with actual specific details from the outfit items.
+The colorPalettes array must always have exactly 4 entries with labels: "Original", "Neutral Tones", "Bold & Bright", "All Black". The "colors" value for "Original" should describe the actual colors of that specific outfit.
 
 Search retailers: ASOS, Zara, H&M, Urban Outfitters, Revolve, Nordstrom, Mango, Free People, & Other Stories, COS, Uniqlo, Princess Polly, Abercrombie, PrettyLittleThing, Boohoo.
 Return 2-3 outfits with 4-5 items each. Mix price points. Use realistic 2025 prices.`;
@@ -59,7 +69,7 @@ export async function onRequestPost({ request, env }) {
     },
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
-      max_tokens: 2500,
+      max_tokens: 4000,
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
@@ -85,8 +95,8 @@ export async function onRequestPost({ request, env }) {
   let result;
   try {
     result = JSON.parse(raw.slice(js, je + 1));
-  } catch {
-    return jsonError('Malformed AI response', 502);
+  } catch (e) {
+    return jsonError(`Malformed AI response: ${e.message} — snippet: ${raw.slice(js, js + 200)}`, 502);
   }
 
   return Response.json(result);
