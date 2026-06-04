@@ -2,6 +2,7 @@ import { addAlert } from './alerts.js';
 import { saveToBoard } from './boards.js';
 import { toast } from './toast.js';
 import { generateImage } from '../api.js';
+import { openStoreSheet } from '../main.js';
 
 function escH(s) {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -59,6 +60,11 @@ export function renderOutfits(outfits) {
                 title="Set price alert">
                 <i class="ti ti-bell"></i>
               </div>
+              <div class="store-btn"
+                data-brand="${escH(item.brand)}" data-item="${escH(item.name)}"
+                title="Find in nearby stores">
+                <i class="ti ti-map-pin"></i>
+              </div>
               <a class="shop-btn" href="${escH(item.searchUrl)}" target="_blank" rel="noopener">
                 Shop <i class="ti ti-arrow-up-right" style="font-size:10px"></i>
               </a>
@@ -82,6 +88,11 @@ export function renderOutfits(outfits) {
     // Wire alert buttons
     card.querySelectorAll('.alert-btn').forEach(btn => {
       btn.addEventListener('click', () => addAlert(btn, btn.dataset.name, btn.dataset.brand, btn.dataset.price, btn.dataset.emoji));
+    });
+
+    // Wire store finder buttons
+    card.querySelectorAll('.store-btn').forEach(btn => {
+      btn.addEventListener('click', () => openStoreSheet(btn.dataset.brand, btn.dataset.item));
     });
 
     // Wire save/share buttons

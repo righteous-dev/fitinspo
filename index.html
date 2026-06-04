@@ -27,8 +27,14 @@
 
   <!-- GENERATE PAGE -->
   <div class="page active" id="page-generate">
-    <div class="hero-label">AI Stylist · Live Web Search · 2025 Trends</div>
+    <div class="hero-label">AI Stylist · Real Retailers · Ages 15–70</div>
     <div class="hero-hed">YOUR <span>AI</span><br>STYLIST.</div>
+
+    <!-- AGE CONTEXT STRIP -->
+    <div class="age-strip">
+      <span class="age-strip-label"><i class="ti ti-user-circle" style="font-size:13px;vertical-align:-2px"></i> Styling for</span>
+      <div class="age-chips" id="ageChips"></div>
+    </div>
 
     <!-- PHOTO UPLOAD -->
     <div class="upload-zone">
@@ -41,7 +47,7 @@
     <!-- PROMPT -->
     <div class="prompt-box">
       <div class="prompt-row">
-        <textarea class="prompt-in" id="promptIn" placeholder="e.g. 'cute going out look for summer' or 'dark academia fall fit'..." rows="2"></textarea>
+        <textarea class="prompt-in" id="promptIn" placeholder="e.g. 'cute going out look for summer' or 'classic weekend brunch look'..." rows="2"></textarea>
         <button class="gen-btn" id="genBtn">
           <i class="ti ti-sparkles"></i> Generate
         </button>
@@ -53,8 +59,8 @@
     <div class="err" id="errBanner"></div>
     <div class="loader" id="loader">
       <div class="spin"></div>
-      <div style="font-size:13px;color:var(--muted)">AI stylist searching retailers...</div>
-      <div class="load-sub" id="loadStep">Analyzing current fashion trends</div>
+      <div style="font-size:13px;color:var(--muted)">AI stylist curating looks for you...</div>
+      <div class="load-sub" id="loadStep">Analyzing 2025 trends</div>
     </div>
 
     <div id="resultsArea" style="display:none">
@@ -85,7 +91,7 @@
   <!-- PROFILE PAGE -->
   <div class="page" id="page-profile">
     <div class="profile-top">
-      <div class="avatar">ST</div>
+      <div class="avatar" id="profileAvatar">ST</div>
       <div class="profile-name">Style Addict</div>
       <div class="profile-sub">Member since June 2025</div>
     </div>
@@ -94,7 +100,31 @@
       <div class="stat-box"><div class="stat-num" id="statBoards">0</div><div class="stat-lbl">Boards</div></div>
       <div class="stat-box"><div class="stat-num" id="statAlerts">0</div><div class="stat-lbl">Alerts</div></div>
     </div>
-    <div class="pref-section">Preferences</div>
+
+    <!-- AGE RANGE -->
+    <div class="pref-section">My Style Profile</div>
+    <div class="pref-row pref-col">
+      <div>
+        <div class="pref-label">Age Range</div>
+        <div class="pref-sub">Styles are tailored to your decade</div>
+      </div>
+      <div class="age-range-grid" id="ageRangeGrid"></div>
+    </div>
+
+    <!-- ZIP CODE -->
+    <div class="pref-row pref-col">
+      <div>
+        <div class="pref-label">Zip Code</div>
+        <div class="pref-sub">Find nearby stores that carry your looks</div>
+      </div>
+      <div class="zip-row">
+        <input class="zip-input" id="zipInput" type="text" inputmode="numeric" maxlength="5" placeholder="e.g. 10001">
+        <button class="zip-save-btn" id="zipSaveBtn"><i class="ti ti-map-pin" style="font-size:13px"></i> Save</button>
+      </div>
+      <div class="zip-status" id="zipStatus"></div>
+    </div>
+
+    <div class="pref-section" style="margin-top:1.25rem">Preferences</div>
     <div class="pref-row">
       <div><div class="pref-label">Price drop notifications</div><div class="pref-sub">Alert when saved items drop in price</div></div>
       <button class="toggle on" onclick="this.classList.toggle('on')"></button>
@@ -120,6 +150,22 @@
     <div class="tab" id="tab-alerts" onclick="goTab('alerts')"><i class="ti ti-bell"></i>Alerts</div>
     <div class="tab" id="tab-profile" onclick="goTab('profile')"><i class="ti ti-user"></i>Profile</div>
   </nav>
+</div>
+
+<!-- STORE FINDER SHEET -->
+<div class="sheet-overlay" id="storeSheetOverlay"></div>
+<div class="store-sheet" id="storeSheet">
+  <div class="sheet-handle"></div>
+  <div class="sheet-header">
+    <div class="sheet-title"><i class="ti ti-map-pin" style="color:var(--accent)"></i> Find in Stores</div>
+    <button class="sheet-close" id="storeSheetClose"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="sheet-zip-row" id="sheetZipRow" style="display:none">
+    <i class="ti ti-info-circle" style="color:var(--muted);font-size:14px"></i>
+    <span>Add your zip code in <strong>Profile</strong> for better results</span>
+    <button class="sheet-zip-btn" onclick="goTab('profile')">Set Zip</button>
+  </div>
+  <div class="sheet-stores" id="sheetStores"></div>
 </div>
 
 <div class="toast" id="toast"></div>

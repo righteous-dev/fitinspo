@@ -40,7 +40,7 @@ Return 2-3 outfits with 4-5 items each. Mix price points. Use realistic 2025 pri
 
 let _outfitCounter = 0;
 
-export async function generateOutfits(prompt) {
+export async function generateOutfits(prompt, ageRange = '26–35') {
   const isLocal = import.meta.env.DEV;
 
   if (isLocal) {
@@ -55,7 +55,7 @@ export async function generateOutfits(prompt) {
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true',
       },
-      body: JSON.stringify(buildPayload(prompt)),
+      body: JSON.stringify(buildPayload(prompt, ageRange)),
     });
 
     if (!res.ok) {
@@ -68,7 +68,7 @@ export async function generateOutfits(prompt) {
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt }),
+    body: JSON.stringify({ prompt, ageRange }),
   });
 
   if (!res.ok) {
@@ -93,14 +93,14 @@ export async function generateImage(imagePrompt, colors) {
   return data.image; // base64 string
 }
 
-function buildPayload(prompt) {
+function buildPayload(prompt, ageRange) {
   return {
     model: 'claude-sonnet-4-6',
-    max_tokens: 3000,
+    max_tokens: 4000,
     system: SYSTEM_PROMPT,
     messages: [{
       role: 'user',
-      content: `Create complete outfit suggestions for: "${prompt}". Mix different retailers and price points. Include vivid imagePrompt and colorPalettes for each outfit.`,
+      content: `Create complete outfit suggestions for: "${prompt}". Style specifically for someone aged ${ageRange} — use age-appropriate silhouettes, trends, and styling. Mix different retailers and price points. Include vivid imagePrompt and colorPalettes for each outfit.`,
     }],
   };
 }

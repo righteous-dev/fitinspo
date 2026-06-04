@@ -49,13 +49,16 @@ export async function onRequestPost({ request, env }) {
     return jsonError('Invalid JSON', 400);
   }
 
-  const { prompt } = body;
+  const { prompt, ageRange } = body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) {
     return jsonError('prompt is required', 400);
   }
   if (prompt.length > 500) {
     return jsonError('prompt too long', 400);
   }
+
+  const validAges = ['15–25', '26–35', '36–45', '46–55', '56–70'];
+  const age = validAges.includes(ageRange) ? ageRange : '26–35';
 
   const key = env.ANTHROPIC_API_KEY;
   if (!key) return jsonError('Server misconfiguration', 500);
@@ -73,7 +76,7 @@ export async function onRequestPost({ request, env }) {
       system: SYSTEM_PROMPT,
       messages: [{
         role: 'user',
-        content: `Create complete outfit suggestions for: "${prompt.trim()}". Search for real products from actual retailers available right now in 2025. Mix different retailers and price points.`,
+        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for someone aged ${age} — use age-appropriate silhouettes, trends, and styling that flatters and feels authentic to that life stage. Mix different retailers and price points. Include vivid imagePrompt and colorPalettes for each outfit.`,
       }],
     }),
   });
