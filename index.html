@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FIT.INSPO — AI Stylist</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
+<link rel="stylesheet" href="/src/style.css">
+</head>
+<body>
+
+<div class="app">
+
+  <!-- TOPBAR -->
+  <div class="topbar">
+    <div class="brand">FIT<em>.</em>INSPO</div>
+    <div class="nav-actions">
+      <div class="nav-btn" id="alertNavBtn" title="Price Alerts" onclick="goTab('alerts')">
+        <i class="ti ti-bell"></i>
+        <div class="badge" id="alertBadge">0</div>
+      </div>
+      <div class="nav-btn" onclick="goTab('profile')" title="Profile">
+        <i class="ti ti-user"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- GENERATE PAGE -->
+  <div class="page active" id="page-generate">
+    <div class="hero-label">AI Stylist · Live Web Search · 2025 Trends</div>
+    <div class="hero-hed">YOUR <span>AI</span><br>STYLIST.</div>
+
+    <!-- PHOTO UPLOAD -->
+    <div class="upload-zone">
+      <input type="file" accept="image/*" id="imgInput">
+      <div class="upload-icon"><i class="ti ti-camera-up"></i></div>
+      <div class="upload-text"><strong>Upload a photo</strong> to find a similar outfit<br>or describe your vibe below</div>
+    </div>
+    <img id="previewImg" class="preview-img" alt="Uploaded outfit reference">
+
+    <!-- PROMPT -->
+    <div class="prompt-box">
+      <div class="prompt-row">
+        <textarea class="prompt-in" id="promptIn" placeholder="e.g. 'cute going out look for summer' or 'dark academia fall fit'..." rows="2"></textarea>
+        <button class="gen-btn" id="genBtn">
+          <i class="ti ti-sparkles"></i> Generate
+        </button>
+      </div>
+    </div>
+
+    <div class="chips" id="chipBar"></div>
+
+    <div class="err" id="errBanner"></div>
+    <div class="loader" id="loader">
+      <div class="spin"></div>
+      <div style="font-size:13px;color:var(--muted)">AI stylist searching retailers...</div>
+      <div class="load-sub" id="loadStep">Analyzing current fashion trends</div>
+    </div>
+
+    <div id="resultsArea" style="display:none">
+      <div class="trend-note" id="trendNote"></div>
+      <div class="section-lbl">Generated Looks</div>
+      <div id="outfitStack"></div>
+    </div>
+  </div>
+
+  <!-- BOARDS PAGE -->
+  <div class="page" id="page-boards">
+    <div class="boards-header">
+      <div class="page-title">My Boards</div>
+      <button class="new-btn" id="newBoardBtn"><i class="ti ti-plus" style="font-size:12px"></i> New</button>
+    </div>
+    <div class="board-grid" id="boardGrid"></div>
+  </div>
+
+  <!-- ALERTS PAGE -->
+  <div class="page" id="page-alerts">
+    <div class="boards-header">
+      <div class="page-title">Price Alerts</div>
+      <div style="font-size:11px;color:var(--muted)" id="alertCount">0 active</div>
+    </div>
+    <div id="alertsList"></div>
+  </div>
+
+  <!-- PROFILE PAGE -->
+  <div class="page" id="page-profile">
+    <div class="profile-top">
+      <div class="avatar">ST</div>
+      <div class="profile-name">Style Addict</div>
+      <div class="profile-sub">Member since June 2025</div>
+    </div>
+    <div class="stats-row">
+      <div class="stat-box"><div class="stat-num" id="statGen">0</div><div class="stat-lbl">Generated</div></div>
+      <div class="stat-box"><div class="stat-num" id="statBoards">0</div><div class="stat-lbl">Boards</div></div>
+      <div class="stat-box"><div class="stat-num" id="statAlerts">0</div><div class="stat-lbl">Alerts</div></div>
+    </div>
+    <div class="pref-section">Preferences</div>
+    <div class="pref-row">
+      <div><div class="pref-label">Price drop notifications</div><div class="pref-sub">Alert when saved items drop in price</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="pref-row">
+      <div><div class="pref-label">Weekly trend digest</div><div class="pref-sub">Fresh looks every Monday</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="pref-row">
+      <div><div class="pref-label">Budget mode</div><div class="pref-sub">Prioritize affordable picks under $50</div></div>
+      <button class="toggle" onclick="this.classList.toggle('on')"></button>
+    </div>
+    <div class="pref-row">
+      <div><div class="pref-label">Affiliate links</div><div class="pref-sub">Support FIT.INSPO when you shop</div></div>
+      <button class="toggle on" onclick="this.classList.toggle('on')"></button>
+    </div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <div class="tab active" id="tab-generate" onclick="goTab('generate')"><i class="ti ti-sparkles"></i>Generate</div>
+    <div class="tab" id="tab-boards" onclick="goTab('boards')"><i class="ti ti-layout-grid"></i>Boards</div>
+    <div class="tab" id="tab-alerts" onclick="goTab('alerts')"><i class="ti ti-bell"></i>Alerts</div>
+    <div class="tab" id="tab-profile" onclick="goTab('profile')"><i class="ti ti-user"></i>Profile</div>
+  </nav>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module" src="/src/main.js"></script>
+</body>
+</html>

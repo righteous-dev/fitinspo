@@ -1,0 +1,10 @@
+name = "fitinspo"
+compatibility_date = "2024-09-23"
+
+# Pages config — build output goes to dist/
+pages_build_output_dir = "dist"
+
+# Worker that handles /api/* routes alongside the static site
+[[workers]]
+  main = "worker/index.js"
+  pattern = "/api/*"
