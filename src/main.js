@@ -1,5 +1,5 @@
 import './style.css';
-import { S, save } from './state.js';
+import { S, save, SKIN_TONES, BODY_TYPES } from './state.js';
 import { generateOutfits } from './api.js';
 import { renderBoards, createBoard } from './ui/boards.js';
 import { renderAlerts, updateAlertBadge } from './ui/alerts.js';
@@ -110,6 +110,59 @@ function refreshChips() {
     chipBar.appendChild(chip);
   });
 }
+
+// ── SKIN TONE SWATCHES ────────────────────────────────────────────────────────
+const skinSwatches = document.getElementById('skinSwatches');
+
+function updateAvatar() {
+  const avatar = document.getElementById('profileAvatar');
+  const skin = SKIN_TONES.find(t => t.id === S.skinTone);
+  if (skin) {
+    avatar.style.background = skin.color;
+    avatar.style.borderColor = skin.color;
+    avatar.innerHTML = `<i class="ti ti-user" style="font-size:28px;color:rgba(0,0,0,0.4)"></i>`;
+  } else {
+    avatar.style.background = 'rgba(212,254,1,.1)';
+    avatar.style.borderColor = 'rgba(212,254,1,.3)';
+    avatar.innerHTML = `<i class="ti ti-user" style="font-size:28px"></i>`;
+  }
+}
+
+SKIN_TONES.forEach(tone => {
+  const swatch = document.createElement('button');
+  swatch.className = 'skin-swatch' + (S.skinTone === tone.id ? ' active' : '');
+  swatch.style.background = tone.color;
+  swatch.title = tone.label;
+  swatch.setAttribute('aria-label', tone.label);
+  swatch.addEventListener('click', () => {
+    // Toggle off if already selected
+    S.skinTone = S.skinTone === tone.id ? '' : tone.id;
+    save();
+    skinSwatches.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+    if (S.skinTone) swatch.classList.add('active');
+    updateAvatar();
+    toast(S.skinTone ? `✓ Skin tone set to ${tone.label}` : 'Skin tone cleared');
+  });
+  skinSwatches.appendChild(swatch);
+});
+
+// ── BODY TYPE CHIPS ───────────────────────────────────────────────────────────
+const bodyChipsEl = document.getElementById('bodyChips');
+
+BODY_TYPES.forEach(type => {
+  const btn = document.createElement('button');
+  btn.className = 'body-chip' + (S.bodyType === type.id ? ' active' : '');
+  btn.textContent = type.label;
+  btn.addEventListener('click', () => {
+    // Toggle off if already selected
+    S.bodyType = S.bodyType === type.id ? '' : type.id;
+    save();
+    bodyChipsEl.querySelectorAll('.body-chip').forEach(b => b.classList.remove('active'));
+    if (S.bodyType) btn.classList.add('active');
+    toast(S.bodyType ? `✓ Body type set to ${type.label}` : 'Body type cleared');
+  });
+  bodyChipsEl.appendChild(btn);
+});
 
 // ── ZIP CODE ─────────────────────────────────────────────────────────────────
 const zipInput = document.getElementById('zipInput');
@@ -311,3 +364,4 @@ renderBoards();
 renderAlerts();
 updateAlertBadge();
 updateStats();
+updateAvatar();

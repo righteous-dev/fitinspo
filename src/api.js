@@ -78,11 +78,11 @@ export async function generateOutfits(prompt, ageRange = '26–35') {
   return assignIds(await res.json());
 }
 
-export async function generateImage(imagePrompt, colors) {
+export async function generateImage(imagePrompt, colors, skinTonePrompt, bodyTypePrompt) {
   const res = await fetch('/api/image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imagePrompt, colors }),
+    body: JSON.stringify({ imagePrompt, colors, skinTonePrompt, bodyTypePrompt }),
   });
 
   if (!res.ok) {
