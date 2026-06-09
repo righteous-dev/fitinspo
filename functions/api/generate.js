@@ -60,8 +60,9 @@ function getAgeDescriptor(gender, ageRange) {
   return byGender[ageRange] || byGender['26–35'];
 }
 
-function buildSystemPrompt(gender, ageRange) {
-  const retailers = getRetailers(gender, ageRange);
+function buildSystemPrompt(gender, ageRange, shopStyle) {
+  const shopDef   = SHOP_STYLES[shopStyle];
+  const retailers = shopDef?.retailers || getRetailers(gender, ageRange);
   const ageDesc = getAgeDescriptor(gender, ageRange);
   const modelDesc = `A professional fashion editorial photo of a ${ageDesc} wearing`;
 
@@ -122,6 +123,23 @@ const BUDGET_TIERS = {
   any:      '',
 };
 
+// Shop styles — must stay in sync with src/state.js
+const SHOP_STYLES = {
+  regular:    { prompt: '', retailers: null },
+  secondhand: {
+    prompt: 'These are secondhand / thrifted / pre-loved outfits. Suggest pieces that work well bought second-hand — classic silhouettes, timeless styles, vintage-inspired looks.',
+    retailers: ['Depop', 'Vinted', 'ThredUp', 'Poshmark', 'ASOS Marketplace', 'eBay Fashion', 'The RealReal', 'Vestiaire Collective', 'Rokit Vintage', 'Beyond Retro'],
+  },
+  sustainable: {
+    prompt: 'These are sustainable, eco-conscious outfits from ethical fashion brands. Prioritise natural fabrics, certified organic materials, and brands known for low environmental impact.',
+    retailers: ['Patagonia', 'Everlane', 'Reformation', 'Tentree', 'Filippa K', 'People Tree', 'Thought Clothing', 'Arket', 'COS', 'Organic Basics', 'Veja', 'Eileen Fisher', 'Frank And Oak', 'Rapanui'],
+  },
+  dupes: {
+    prompt: 'These are budget-friendly outfits — affordable dupes and lookalikes of trending styles. Maximum style, minimum spend.',
+    retailers: ['Shein', 'Primark', 'Boohoo', 'PrettyLittleThing', 'Fashion Nova', 'Missguided', 'H&M', 'Zara', 'ASOS', 'Temu Fashion'],
+  },
+};
+
 // Occasions — must stay in sync with src/state.js
 const OCCASIONS = {
   any:      '',
@@ -141,7 +159,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return jsonError('Invalid JSON', 400); }
 
-  const { prompt, ageRange, gender, budget, occasion } = body;
+  const { prompt, ageRange, gender, budget, occasion, shopStyle } = body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) return jsonError('prompt is required', 400);
   if (prompt.length > 500) return jsonError('prompt too long', 400);
 
@@ -161,10 +179,10 @@ export async function onRequestPost({ request, env }) {
     body: JSON.stringify({
       model: 'claude-sonnet-4-6',
       max_tokens: 4000,
-      system: buildSystemPrompt(gen, age),
+      system: buildSystemPrompt(gen, age, shopStyle),
       messages: [{
         role: 'user',
-        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. ${OCCASIONS[occasion] ? `The outfits are ${OCCASIONS[occasion]}.` : ''} ${BUDGET_TIERS[budget] || ''} IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Include vivid imagePrompt and colorPalettes for each outfit.`,
+        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. ${OCCASIONS[occasion] ? `The outfits are ${OCCASIONS[occasion]}.` : ''} ${SHOP_STYLES[shopStyle]?.prompt || ''} ${BUDGET_TIERS[budget] || ''} IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Include vivid imagePrompt and colorPalettes for each outfit.`,
       }],
     }),
   });
@@ -187,7 +205,8 @@ export async function onRequestPost({ request, env }) {
   catch (e) { return jsonError(`Malformed AI response: ${e.message}`, 502); }
 
   // Post-process: remap any off-list brands to approved retailers
-  result = enforceRetailers(result, getRetailers(gen, age));
+  const approvedRetailers = SHOP_STYLES[shopStyle]?.retailers || getRetailers(gen, age);
+  result = enforceRetailers(result, approvedRetailers);
 
   return Response.json(result);
 }

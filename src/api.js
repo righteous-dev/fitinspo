@@ -1,7 +1,7 @@
 // In dev mode, calls Anthropic directly (requires VITE_ANTHROPIC_KEY env var).
 // In production, calls /api/* on the Cloudflare Pages Functions proxy.
 
-import { getRetailers, BUDGET_TIERS, OCCASIONS } from './state.js';
+import { getRetailers, BUDGET_TIERS, OCCASIONS, SHOP_STYLES } from './state.js';
 
 // Age descriptors — must stay in sync with functions/api/image.js
 const AGE_DESCRIPTORS = {
@@ -16,8 +16,9 @@ function getAgeDesc(gender, ageRange) {
 }
 
 // System prompt template — retailers and model description injected per request
-function buildSystemPrompt(gender, ageRange) {
-  const retailers = getRetailers(gender, ageRange);
+function buildSystemPrompt(gender, ageRange, shopStyle) {
+  const shopStyleDef = SHOP_STYLES.find(s => s.id === shopStyle);
+  const retailers = shopStyleDef?.retailers || getRetailers(gender, ageRange);
   const ageDesc = getAgeDesc(gender, ageRange);
   const modelDesc = `A professional fashion editorial photo of a ${ageDesc} wearing`;
 
@@ -63,7 +64,7 @@ Return 2-3 outfits with 4-5 items each. Mix price points. Use realistic 2025 pri
 
 let _outfitCounter = 0;
 
-export async function generateOutfits(prompt, ageRange = '26–35', gender = 'woman', budget = 'any', occasion = 'any') {
+export async function generateOutfits(prompt, ageRange = '26–35', gender = 'woman', budget = 'any', occasion = 'any', shopStyle = 'regular') {
   const isLocal = import.meta.env.DEV;
 
   if (isLocal) {
@@ -78,7 +79,7 @@ export async function generateOutfits(prompt, ageRange = '26–35', gender = 'wo
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true',
       },
-      body: JSON.stringify(buildPayload(prompt, ageRange, gender, budget, occasion)),
+      body: JSON.stringify(buildPayload(prompt, ageRange, gender, budget, occasion, shopStyle)),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -90,7 +91,7 @@ export async function generateOutfits(prompt, ageRange = '26–35', gender = 'wo
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, ageRange, gender, budget, occasion }),
+    body: JSON.stringify({ prompt, ageRange, gender, budget, occasion, shopStyle }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -112,18 +113,20 @@ export async function generateImage(imagePrompt, colors, skinTonePrompt, bodyTyp
   return (await res.json()).image;
 }
 
-function buildPayload(prompt, ageRange, gender, budget, occasion) {
-  const budgetTier   = BUDGET_TIERS.find(t => t.id === budget);
-  const occasionTier = OCCASIONS.find(t => t.id === occasion);
-  const budgetStr    = budgetTier?.prompt   || '';
-  const occasionStr  = occasionTier?.prompt || '';
+function buildPayload(prompt, ageRange, gender, budget, occasion, shopStyle) {
+  const budgetTier    = BUDGET_TIERS.find(t => t.id === budget);
+  const occasionTier  = OCCASIONS.find(t => t.id === occasion);
+  const shopStyleDef  = SHOP_STYLES.find(s => s.id === shopStyle);
+  const budgetStr     = budgetTier?.prompt    || '';
+  const occasionStr   = occasionTier?.prompt  || '';
+  const shopStyleStr  = shopStyleDef?.prompt  || '';
   return {
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
-    system: buildSystemPrompt(gender, ageRange),
+    system: buildSystemPrompt(gender, ageRange, shopStyle),
     messages: [{
       role: 'user',
-      content: `Create complete outfit suggestions for: "${prompt}". Style specifically for a ${gender} aged ${ageRange} — use age-appropriate silhouettes, trends and styling. ${occasionStr ? `The outfits are ${occasionStr}.` : ''} ${budgetStr} Mix different retailers from the approved list. Include vivid imagePrompt and colorPalettes for each outfit.`,
+      content: `Create complete outfit suggestions for: "${prompt}". Style specifically for a ${gender} aged ${ageRange} — use age-appropriate silhouettes, trends and styling. ${occasionStr ? `The outfits are ${occasionStr}.` : ''} ${shopStyleStr} ${budgetStr} Mix different retailers from the approved list. Include vivid imagePrompt and colorPalettes for each outfit.`,
     }],
   };
 }

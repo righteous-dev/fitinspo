@@ -10,7 +10,8 @@ const KEY = {
   budget:   'fitinspo_budget',
   theme:    'fitinspo_theme',
   fontSize: 'fitinspo_fontsize',
-  occasion: 'fitinspo_occasion',
+  occasion:  'fitinspo_occasion',
+  shopStyle: 'fitinspo_shop',
 };
 
 const DEFAULT_BOARDS = [
@@ -30,7 +31,8 @@ export const S = {
   budget:   localStorage.getItem(KEY.budget)   || 'any',
   theme:    localStorage.getItem(KEY.theme)    || 'dark',
   fontSize: localStorage.getItem(KEY.fontSize) || 'normal',
-  occasion: localStorage.getItem(KEY.occasion) || 'any',
+  occasion:  localStorage.getItem(KEY.occasion)  || 'any',
+  shopStyle: localStorage.getItem(KEY.shopStyle) || 'regular',
 };
 
 export function save() {
@@ -45,8 +47,29 @@ export function save() {
   localStorage.setItem(KEY.budget,   S.budget);
   localStorage.setItem(KEY.theme,    S.theme);
   localStorage.setItem(KEY.fontSize, S.fontSize);
-  localStorage.setItem(KEY.occasion, S.occasion);
+  localStorage.setItem(KEY.occasion,  S.occasion);
+  localStorage.setItem(KEY.shopStyle, S.shopStyle);
 }
+
+// Shopping style modes
+export const SHOP_STYLES = [
+  { id: 'regular',    label: '🏪 Regular',     prompt: '',    retailers: null },  // uses normal age×gender pools
+  {
+    id: 'secondhand', label: '♻️ Secondhand',
+    prompt: 'These are secondhand / thrifted / pre-loved outfits. Suggest pieces that work well bought second-hand — classic silhouettes, timeless styles, vintage-inspired looks.',
+    retailers: ['Depop', 'Vinted', 'ThredUp', 'Poshmark', 'ASOS Marketplace', 'eBay Fashion', 'The RealReal', 'Vestiaire Collective', 'Rokit Vintage', 'Beyond Retro'],
+  },
+  {
+    id: 'sustainable', label: '🌿 Sustainable',
+    prompt: 'These are sustainable, eco-conscious outfits from ethical fashion brands. Prioritise natural fabrics, certified organic materials, and brands known for low environmental impact.',
+    retailers: ['Patagonia', 'Everlane', 'Reformation', 'Tentree', 'Filippa K', 'People Tree', 'Thought Clothing', 'Arket', 'COS', 'Organic Basics', 'Veja', 'Eileen Fisher', 'Frank And Oak', 'Rapanui'],
+  },
+  {
+    id: 'dupes',       label: '💸 Budget Dupes',
+    prompt: 'These are budget-friendly outfits — affordable dupes and lookalikes of trending styles. Maximum style, minimum spend.',
+    retailers: ['Shein', 'Primark', 'Boohoo', 'PrettyLittleThing', 'Fashion Nova', 'Missguided', 'H&M', 'Zara', 'ASOS', 'Temu Fashion'],
+  },
+];
 
 // Occasions
 export const OCCASIONS = [

@@ -1,5 +1,5 @@
 import './style.css';
-import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes, BUDGET_TIERS, OCCASIONS } from './state.js';
+import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes, BUDGET_TIERS, OCCASIONS, SHOP_STYLES } from './state.js';
 import { generateOutfits } from './api.js';
 import { renderBoards, createBoard } from './ui/boards.js';
 import { renderAlerts, updateAlertBadge } from './ui/alerts.js';
@@ -310,6 +310,23 @@ OCCASIONS.forEach(occ => {
   occasionChipsEl.appendChild(btn);
 });
 
+// ── SHOP STYLE CHIPS ─────────────────────────────────────────────────────────
+const shopChipsEl = document.getElementById('shopChips');
+
+SHOP_STYLES.forEach(style => {
+  const btn = document.createElement('button');
+  btn.className = 'shop-chip' + (S.shopStyle === style.id ? ' active' : '');
+  btn.textContent = style.label;
+  btn.addEventListener('click', () => {
+    S.shopStyle = style.id;
+    save();
+    shopChipsEl.querySelectorAll('.shop-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    if (style.id !== 'regular') toast(`${style.label} mode on`);
+  });
+  shopChipsEl.appendChild(btn);
+});
+
 // ── ZIP CODE ─────────────────────────────────────────────────────────────────
 const zipInput = document.getElementById('zipInput');
 const zipStatus = document.getElementById('zipStatus');
@@ -456,7 +473,7 @@ async function generate() {
   }, 1600);
 
   try {
-    const result = await generateOutfits(prompt, S.ageRange, S.gender, S.budget, S.occasion);
+    const result = await generateOutfits(prompt, S.ageRange, S.gender, S.budget, S.occasion, S.shopStyle);
     clearInterval(stepTimer);
     document.getElementById('loader').classList.remove('show');
     S.totalGen += result.outfits.length;
