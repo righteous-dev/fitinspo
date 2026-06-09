@@ -1,5 +1,5 @@
 import './style.css';
-import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes, BUDGET_TIERS } from './state.js';
+import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes, BUDGET_TIERS, OCCASIONS } from './state.js';
 import { generateOutfits } from './api.js';
 import { renderBoards, createBoard } from './ui/boards.js';
 import { renderAlerts, updateAlertBadge } from './ui/alerts.js';
@@ -294,6 +294,22 @@ function buildBudgetChips(container, chipClass) {
 buildBudgetChips(document.getElementById('budgetChips'), 'budget-chip');
 buildBudgetChips(document.getElementById('budgetChipsProfile'), 'budget-chip');
 
+// ── OCCASION CHIPS ───────────────────────────────────────────────────────────
+const occasionChipsEl = document.getElementById('occasionChips');
+
+OCCASIONS.forEach(occ => {
+  const btn = document.createElement('button');
+  btn.className = 'occasion-chip' + (S.occasion === occ.id ? ' active' : '');
+  btn.textContent = occ.label;
+  btn.addEventListener('click', () => {
+    S.occasion = occ.id;
+    save();
+    occasionChipsEl.querySelectorAll('.occasion-chip').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+  });
+  occasionChipsEl.appendChild(btn);
+});
+
 // ── ZIP CODE ─────────────────────────────────────────────────────────────────
 const zipInput = document.getElementById('zipInput');
 const zipStatus = document.getElementById('zipStatus');
@@ -440,7 +456,7 @@ async function generate() {
   }, 1600);
 
   try {
-    const result = await generateOutfits(prompt, S.ageRange, S.gender, S.budget);
+    const result = await generateOutfits(prompt, S.ageRange, S.gender, S.budget, S.occasion);
     clearInterval(stepTimer);
     document.getElementById('loader').classList.remove('show');
     S.totalGen += result.outfits.length;

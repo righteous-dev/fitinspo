@@ -115,11 +115,25 @@ function normaliseAge(raw) {
 
 // Budget tiers — must stay in sync with src/state.js
 const BUDGET_TIERS = {
-  thrifty:  'Total outfit budget is under $75. Every item must be budget-friendly and affordable. Keep individual item prices low, mostly under $25 each.',
+  thrifty:  'Total outfit budget is under $75. Every item must be budget-friendly. Keep individual item prices low, mostly under $25 each.',
   everyday: 'Total outfit budget is $75–$200. Mix affordable and mid-range pieces. Keep individual items mostly under $60.',
   premium:  'Total outfit budget is $200–$400. Mix mid-range and some premium pieces. Individual items can go up to $120.',
   luxury:   'This is a luxury outfit — no strict budget. Use premium and designer-adjacent pieces. Quality over price.',
   any:      '',
+};
+
+// Occasions — must stay in sync with src/state.js
+const OCCASIONS = {
+  any:      '',
+  work:     'specifically for a work or professional setting',
+  casual:   'for everyday casual wear',
+  date:     'for a romantic date night',
+  evening:  'for a night out, bar or social event',
+  occasion: 'for a special occasion, party or celebration',
+  active:   'for sport, gym or active lifestyle',
+  travel:   'for travel, airport or long-haul comfort with style',
+  smart:    'smart casual — polished but relaxed',
+  beach:    'for beach, pool or resort holiday',
 };
 
 export async function onRequestPost({ request, env }) {
@@ -127,7 +141,7 @@ export async function onRequestPost({ request, env }) {
   try { body = await request.json(); }
   catch { return jsonError('Invalid JSON', 400); }
 
-  const { prompt, ageRange, gender, budget } = body;
+  const { prompt, ageRange, gender, budget, occasion } = body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) return jsonError('prompt is required', 400);
   if (prompt.length > 500) return jsonError('prompt too long', 400);
 
@@ -150,7 +164,7 @@ export async function onRequestPost({ request, env }) {
       system: buildSystemPrompt(gen, age),
       messages: [{
         role: 'user',
-        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. ${BUDGET_TIERS[budget] || ''} IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Include vivid imagePrompt and colorPalettes for each outfit.`,
+        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. ${OCCASIONS[occasion] ? `The outfits are ${OCCASIONS[occasion]}.` : ''} ${BUDGET_TIERS[budget] || ''} IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Include vivid imagePrompt and colorPalettes for each outfit.`,
       }],
     }),
   });

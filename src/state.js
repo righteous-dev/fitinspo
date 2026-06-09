@@ -10,6 +10,7 @@ const KEY = {
   budget:   'fitinspo_budget',
   theme:    'fitinspo_theme',
   fontSize: 'fitinspo_fontsize',
+  occasion: 'fitinspo_occasion',
 };
 
 const DEFAULT_BOARDS = [
@@ -29,6 +30,7 @@ export const S = {
   budget:   localStorage.getItem(KEY.budget)   || 'any',
   theme:    localStorage.getItem(KEY.theme)    || 'dark',
   fontSize: localStorage.getItem(KEY.fontSize) || 'normal',
+  occasion: localStorage.getItem(KEY.occasion) || 'any',
 };
 
 export function save() {
@@ -43,7 +45,22 @@ export function save() {
   localStorage.setItem(KEY.budget,   S.budget);
   localStorage.setItem(KEY.theme,    S.theme);
   localStorage.setItem(KEY.fontSize, S.fontSize);
+  localStorage.setItem(KEY.occasion, S.occasion);
 }
+
+// Occasions
+export const OCCASIONS = [
+  { id: 'any',      label: '✨ Any',          prompt: '' },
+  { id: 'work',     label: '🏢 Work',         prompt: 'specifically for a work or professional setting' },
+  { id: 'casual',   label: '🌿 Everyday',     prompt: 'for everyday casual wear' },
+  { id: 'date',     label: '💕 Date Night',   prompt: 'for a romantic date night' },
+  { id: 'evening',  label: '🍸 Evening Out',  prompt: 'for a night out, bar or social event' },
+  { id: 'occasion', label: '🎉 Special Event','prompt': 'for a special occasion, party or celebration' },
+  { id: 'active',   label: '🏋️ Active',       prompt: 'for sport, gym or active lifestyle' },
+  { id: 'travel',   label: '✈️ Travel',        prompt: 'for travel, airport or long-haul comfort with style' },
+  { id: 'smart',    label: '💼 Smart Casual',  prompt: 'smart casual — polished but relaxed' },
+  { id: 'beach',    label: '🌊 Beach / Resort','prompt': 'for beach, pool or resort holiday' },
+];
 
 // Budget tiers
 export const BUDGET_TIERS = [
