@@ -66,9 +66,12 @@ export function renderOutfits(outfits) {
                 title="Find in nearby stores">
                 <i class="ti ti-map-pin"></i>
               </div>
-              <a class="shop-btn" href="${escH(item.searchUrl)}" target="_blank" rel="noopener">
+              <a class="shop-btn" href="${escH(item.searchUrl)}" target="_blank" rel="noopener" title="Search ${escH(item.brand)}">
                 Shop <i class="ti ti-arrow-up-right" style="font-size:10px"></i>
               </a>
+              ${item.googleShopUrl ? `<a class="gshop-btn" href="${escH(item.googleShopUrl)}" target="_blank" rel="noopener" title="See real products on Google Shopping">
+                <i class="ti ti-photo-search"></i>
+              </a>` : ''}
             </div>
           </div>
         `).join('')}

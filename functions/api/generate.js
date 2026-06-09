@@ -204,9 +204,10 @@ export async function onRequestPost({ request, env }) {
   try { result = JSON.parse(raw.slice(js, je + 1)); }
   catch (e) { return jsonError(`Malformed AI response: ${e.message}`, 502); }
 
-  // Post-process: remap any off-list brands to approved retailers
+  // Post-process: remap any off-list brands + rebuild all search URLs
   const approvedRetailers = SHOP_STYLES[shopStyle]?.retailers || getRetailers(gen, age);
   result = enforceRetailers(result, approvedRetailers);
+  result = injectLinks(result);
 
   return Response.json(result);
 }
@@ -292,6 +293,23 @@ function enforceRetailers(result, approved) {
         item.brand = replacement;
         item.searchUrl = buildSearchUrl(replacement, item.name);
       }
+    });
+  });
+  return result;
+}
+
+// Rebuild searchUrl for every item using proper deep-links,
+// and add googleShopUrl for a real product grid experience
+function injectLinks(result) {
+  if (!result?.outfits) return result;
+  result.outfits.forEach(outfit => {
+    if (!outfit.items) return;
+    outfit.items.forEach(item => {
+      // Rebuild retailer search URL with proper deep-link pattern
+      item.searchUrl = buildSearchUrl(item.brand, item.name);
+      // Add Google Shopping URL — shows real product photos, prices, direct buy links
+      const q = encodeURIComponent(`${item.name} ${item.brand}`);
+      item.googleShopUrl = `https://www.google.com/search?q=${q}&tbm=shop&hl=en`;
     });
   });
   return result;
