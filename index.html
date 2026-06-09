@@ -6,6 +6,15 @@
 <title>FIT.INSPO — AI Stylist</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <link rel="stylesheet" href="/src/style.css">
+<!-- Apply theme + font size before first paint to avoid flash -->
+<script>
+  (function(){
+    var t=localStorage.getItem('fitinspo_theme');
+    var f=localStorage.getItem('fitinspo_fontsize');
+    if(t==='light') document.documentElement.classList.add('light-mode');
+    if(f==='large') document.documentElement.classList.add('font-large');
+  })();
+</script>
 </head>
 <body>
 
@@ -156,6 +165,28 @@
     </div>
 
     <div class="pref-section" style="margin-top:1.25rem">Preferences</div>
+
+    <!-- THEME TOGGLE -->
+    <div class="pref-row">
+      <div>
+        <div class="pref-label" id="themePrefLabel">🌙 Dark Mode</div>
+        <div class="pref-sub">Switch between dark and light theme</div>
+      </div>
+      <button class="toggle on" id="themeToggle"></button>
+    </div>
+
+    <!-- FONT SIZE -->
+    <div class="pref-row">
+      <div>
+        <div class="pref-label">𝐓 Text Size</div>
+        <div class="pref-sub">Larger text for easier reading</div>
+      </div>
+      <div class="font-size-btns">
+        <button class="font-size-btn active" id="fontNormalBtn">A</button>
+        <button class="font-size-btn large" id="fontLargeBtn">A</button>
+      </div>
+    </div>
+
     <div class="pref-row">
       <div><div class="pref-label">Price drop notifications</div><div class="pref-sub">Alert when saved items drop in price</div></div>
       <button class="toggle on" onclick="this.classList.toggle('on')"></button>

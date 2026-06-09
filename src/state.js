@@ -8,6 +8,8 @@ const KEY = {
   bodyType: 'fitinspo_body',
   gender:   'fitinspo_gender',
   budget:   'fitinspo_budget',
+  theme:    'fitinspo_theme',
+  fontSize: 'fitinspo_fontsize',
 };
 
 const DEFAULT_BOARDS = [
@@ -25,6 +27,8 @@ export const S = {
   bodyType: localStorage.getItem(KEY.bodyType) || '',
   gender:   localStorage.getItem(KEY.gender)   || 'woman',
   budget:   localStorage.getItem(KEY.budget)   || 'any',
+  theme:    localStorage.getItem(KEY.theme)    || 'dark',
+  fontSize: localStorage.getItem(KEY.fontSize) || 'normal',
 };
 
 export function save() {
@@ -37,6 +41,8 @@ export function save() {
   localStorage.setItem(KEY.bodyType, S.bodyType);
   localStorage.setItem(KEY.gender,   S.gender);
   localStorage.setItem(KEY.budget,   S.budget);
+  localStorage.setItem(KEY.theme,    S.theme);
+  localStorage.setItem(KEY.fontSize, S.fontSize);
 }
 
 // Budget tiers

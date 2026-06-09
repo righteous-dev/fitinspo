@@ -179,6 +179,93 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Outfit
 .toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(10px);background:rgba(18,18,18,.96);border:0.5px solid rgba(212,254,1,.3);color:var(--accent);font-size:12px;font-weight:500;padding:8px 20px;border-radius:999px;opacity:0;transition:all .25s;z-index:200;white-space:nowrap;pointer-events:none;max-width:calc(100vw - 2rem);text-align:center}
 .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
 
+/* ── LIGHT MODE ─────────────────────────────────────────────────────────────── */
+html.light-mode {
+  --accent: #5a7a00;
+  --bg: #f5f4f1;
+  --bg2: rgba(0,0,0,0.05);
+  --bg3: rgba(0,0,0,0.09);
+  --border: rgba(0,0,0,0.13);
+  --text: #1a1a1a;
+  --muted: rgba(0,0,0,0.45);
+}
+html.light-mode body { background: var(--bg); }
+html.light-mode .topbar { background: rgba(245,244,241,0.97); }
+html.light-mode .bottom-nav { background: rgba(245,244,241,0.97); }
+html.light-mode .outfit-img-shimmer { background: #e8e6e3; }
+html.light-mode .shimmer-inner { background: linear-gradient(90deg,#e8e6e3 0%,rgba(0,0,0,.07) 50%,#e8e6e3 100%); background-size:200% 100%; }
+html.light-mode .outfit-image-wrap { background: #ddd; }
+html.light-mode .card-head { border-bottom-color: rgba(0,0,0,.09); }
+html.light-mode .card-desc { color: rgba(0,0,0,.55); border-bottom-color: rgba(0,0,0,.07); }
+html.light-mode .item-row:hover { background: rgba(0,0,0,.04); }
+html.light-mode .item-num { color: rgba(0,0,0,.25); }
+html.light-mode .item-meta { color: var(--muted); }
+html.light-mode .card-foot { border-top-color: rgba(0,0,0,.07); }
+html.light-mode .color-palette-row { border-bottom-color: rgba(0,0,0,.07); }
+html.light-mode .toast { background: rgba(245,244,241,.97); color: var(--accent); }
+html.light-mode .store-sheet { background: #f0ede8; }
+html.light-mode .sheet-overlay { background: rgba(0,0,0,.4); }
+html.light-mode .brand em { color: var(--accent); }
+html.light-mode .hero-hed span { color: var(--accent); }
+html.light-mode .trend-note { background: rgba(90,122,0,.07); border-color: rgba(90,122,0,.25); color: rgba(70,100,0,.85); }
+html.light-mode .api-gate { background: rgba(90,122,0,.06); border-color: rgba(90,122,0,.25); }
+html.light-mode .age-chip.active,.html.light-mode .gender-chip.active,.html.light-mode .budget-chip.active,.html.light-mode .palette-chip.active,.html.light-mode .body-chip.active,.html.light-mode .age-range-btn.active { background: var(--accent); color: #fff; }
+html.light-mode .gen-btn { background: var(--accent); color: #fff; }
+html.light-mode .gen-btn:hover:not(:disabled) { background: #4a6800; }
+html.light-mode .new-btn { background: var(--accent); color: #fff; }
+html.light-mode .zip-save-btn { background: var(--accent); color: #fff; }
+html.light-mode .api-save-btn { background: var(--accent); color: #fff; }
+html.light-mode .sheet-zip-btn { background: var(--accent); color: #fff; }
+html.light-mode .stat-num { color: var(--accent); }
+html.light-mode .watching-badge { background: rgba(90,122,0,.1); color: var(--accent); border-color: rgba(90,122,0,.25); }
+html.light-mode .alert-icon { background: rgba(90,122,0,.08); border-color: rgba(90,122,0,.2); }
+html.light-mode .vtag { border-color: rgba(90,122,0,.3); color: rgba(70,100,0,.8); }
+html.light-mode .item-price { color: var(--accent); }
+html.light-mode .toggle.on { background: var(--accent); }
+html.light-mode .skin-swatch.active { box-shadow: 0 0 0 3px rgba(90,122,0,.3); }
+html.light-mode .load-sub { color: rgba(70,100,0,.7); }
+html.light-mode .prompt-in { color: var(--text); }
+html.light-mode .prompt-in::placeholder { color: rgba(0,0,0,.35); }
+html.light-mode .prompt-box { background: rgba(0,0,0,.04); }
+
+/* ── FONT LARGE ──────────────────────────────────────────────────────────────── */
+html.font-large .hero-hed        { font-size:48px; }
+html.font-large .hero-label      { font-size:12px; }
+html.font-large .prompt-in       { font-size:16px; }
+html.font-large .item-name       { font-size:15px; }
+html.font-large .item-meta       { font-size:13px; }
+html.font-large .item-price      { font-size:15px; }
+html.font-large .card-desc       { font-size:14px; line-height:1.7; }
+html.font-large .chip            { font-size:13px; padding:7px 14px; }
+html.font-large .age-chip,.font-large .gender-chip,.font-large .budget-chip { font-size:13px; padding:6px 13px; }
+html.font-large .pref-label      { font-size:15px; }
+html.font-large .pref-sub        { font-size:13px; }
+html.font-large .board-name      { font-size:15px; }
+html.font-large .board-count     { font-size:13px; }
+html.font-large .alert-name      { font-size:15px; }
+html.font-large .alert-meta      { font-size:13px; }
+html.font-large .shop-btn        { font-size:13px; padding:7px 13px; }
+html.font-large .gen-btn         { font-size:15px; padding:12px 18px; }
+html.font-large .total           { font-size:14px; }
+html.font-large .total strong    { font-size:16px; }
+html.font-large .section-lbl     { font-size:12px; }
+html.font-large .vtag            { font-size:12px; }
+html.font-large .tab             { font-size:11px; }
+html.font-large .appear-label    { font-size:15px; }
+html.font-large .appear-sub      { font-size:13px; }
+html.font-large .zip-input       { font-size:15px; }
+html.font-large .sheet-title     { font-size:17px; }
+html.font-large .store-link-title{ font-size:15px; }
+html.font-large .store-link-sub  { font-size:13px; }
+
+/* ── FONT SIZE PICKER (profile) ─────────────────────────────────────────────── */
+.font-size-btns { display:flex; gap:6px; align-items:center; }
+.font-size-btn  { width:36px;height:36px;border-radius:10px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Bebas Neue',sans-serif;font-weight:700;transition:all .15s;display:flex;align-items:center;justify-content:center; }
+.font-size-btn.large { font-size:22px; }
+.font-size-btn:not(.large) { font-size:15px; }
+.font-size-btn.active { background:var(--accent);color:#0a0a0a;border-color:var(--accent); }
+html.light-mode .font-size-btn.active { color:#fff; }
+
 /* PROFILE — APPEARANCE */
 .appearance-card{background:var(--bg2);border:0.5px solid var(--border);border-radius:14px;padding:1rem 1.1rem;margin-bottom:1px;display:flex;flex-direction:column;gap:1.1rem}
 .appear-block{display:flex;flex-direction:column;gap:8px}

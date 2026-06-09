@@ -469,6 +469,42 @@ document.getElementById('promptIn').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
 });
 
+// ── THEME TOGGLE ─────────────────────────────────────────────────────────────
+const themeToggle    = document.getElementById('themeToggle');
+const themePrefLabel = document.getElementById('themePrefLabel');
+
+function applyTheme() {
+  const isLight = S.theme === 'light';
+  document.documentElement.classList.toggle('light-mode', isLight);
+  themeToggle.classList.toggle('on', !isLight); // toggle ON = dark mode active
+  themePrefLabel.textContent = isLight ? '☀️ Light Mode' : '🌙 Dark Mode';
+}
+
+themeToggle.addEventListener('click', () => {
+  S.theme = S.theme === 'dark' ? 'light' : 'dark';
+  save();
+  applyTheme();
+  toast(S.theme === 'light' ? '☀️ Light mode on' : '🌙 Dark mode on');
+});
+
+applyTheme();
+
+// ── FONT SIZE ────────────────────────────────────────────────────────────────
+const fontNormalBtn = document.getElementById('fontNormalBtn');
+const fontLargeBtn  = document.getElementById('fontLargeBtn');
+
+function applyFontSize() {
+  const isLarge = S.fontSize === 'large';
+  document.documentElement.classList.toggle('font-large', isLarge);
+  fontNormalBtn.classList.toggle('active', !isLarge);
+  fontLargeBtn.classList.toggle('active', isLarge);
+}
+
+fontNormalBtn.addEventListener('click', () => { S.fontSize = 'normal'; save(); applyFontSize(); });
+fontLargeBtn.addEventListener('click', () => { S.fontSize = 'large'; save(); applyFontSize(); toast('Large text on'); });
+
+applyFontSize();
+
 // ── BOARDS ────────────────────────────────────────────────────────────────────
 document.getElementById('newBoardBtn').addEventListener('click', createBoard);
 
