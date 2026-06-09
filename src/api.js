@@ -1,11 +1,11 @@
 // In dev mode, calls Anthropic directly (requires VITE_ANTHROPIC_KEY env var).
 // In production, calls /api/* on the Cloudflare Pages Functions proxy.
 
-import { RETAILERS } from './state.js';
+import { getRetailers } from './state.js';
 
 // System prompt template — retailers and model word injected per request
-function buildSystemPrompt(gender) {
-  const retailers = RETAILERS[gender] || RETAILERS.woman;
+function buildSystemPrompt(gender, ageRange) {
+  const retailers = getRetailers(gender, ageRange);
   const modelWord = gender === 'man' ? 'man' : gender === 'nonbinary' ? 'person' : 'woman';
   const modelDesc = gender === 'man'
     ? 'A professional fashion editorial photo of a stylish young man wearing'
@@ -47,7 +47,9 @@ Return ONLY valid JSON with no markdown fences, no preamble, no extra text:
 
 IMPORTANT: The imagePrompt must be a vivid detailed Stable Diffusion prompt. Replace [describe full outfit...] with actual specific visual details from the items. The "colors" value for "Original" must describe the actual colors of that outfit.
 
-Search retailers: ${retailers.join(', ')}.
+STRICT RETAILER RULE: Only use brands from this approved list — do not suggest any other store even if you think it is relevant or popular:
+${retailers.map(r => `  - ${r}`).join('\n')}
+
 Return 2-3 outfits with 4-5 items each. Mix price points. Use realistic 2025 prices.`;
 }
 
@@ -106,7 +108,7 @@ function buildPayload(prompt, ageRange, gender) {
   return {
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
-    system: buildSystemPrompt(gender),
+    system: buildSystemPrompt(gender, ageRange),
     messages: [{
       role: 'user',
       content: `Create complete outfit suggestions for: "${prompt}". Style specifically for a ${gender} aged ${ageRange} — use age-appropriate silhouettes, trends and styling that feel authentic to that life stage. Mix different retailers and price points. Include vivid imagePrompt and colorPalettes for each outfit.`,

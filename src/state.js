@@ -88,21 +88,32 @@ export function getBodyTypes(gender) {
   return BODY_TYPES_WOMAN;
 }
 
-// Retailers by gender — injected into the Claude system prompt
+// Retailers by gender × age — injected into the Claude system prompt
 export const RETAILERS = {
-  woman: [
-    'ASOS', 'Zara', 'H&M', 'Urban Outfitters', 'Revolve', 'Nordstrom',
-    'Mango', 'Free People', '& Other Stories', 'COS', 'Uniqlo',
-    'Princess Polly', 'Abercrombie', 'PrettyLittleThing', 'Boohoo',
-  ],
-  man: [
-    'ASOS Men', 'Zara Man', 'H&M Men', 'Urban Outfitters Men', 'Nordstrom Men',
-    'Uniqlo', 'Abercrombie Men', 'Nike', 'Adidas', 'Carhartt',
-    'Pull&Bear', 'River Island Men', 'Next Men', 'Represent', 'COS Men',
-  ],
-  nonbinary: [
-    'ASOS', 'Zara', 'H&M', 'Urban Outfitters', 'Nordstrom', 'COS',
-    'Uniqlo', 'Weekday', 'Arket', 'Abercrombie', 'Collusion',
-    'Nike', 'Carhartt', 'Pull&Bear', '& Other Stories',
-  ],
+  woman: {
+    '15–25': ['ASOS', 'Zara', 'H&M', 'Urban Outfitters', 'Princess Polly', 'PrettyLittleThing', 'Boohoo', 'Revolve', 'Abercrombie', 'Free People', 'Mango', 'Uniqlo'],
+    '26–35': ['ASOS', 'Zara', 'H&M', 'Revolve', 'Nordstrom', 'Mango', 'Free People', '& Other Stories', 'COS', 'Uniqlo', 'Abercrombie', 'Anthropologie'],
+    '36–45': ['Nordstrom', 'Zara', 'Mango', '& Other Stories', 'COS', 'Uniqlo', 'Banana Republic', 'J.Crew', 'Reiss', 'Anthropologie', 'Club Monaco', 'Arket'],
+    '46–55': ['Nordstrom', 'COS', 'Uniqlo', 'Banana Republic', 'J.Crew', 'Reiss', 'M&S', 'Hobbs', 'Ann Taylor', 'Talbots', 'Arket', 'Boden'],
+    '56–70': ['Nordstrom', 'M&S', 'Hobbs', 'Eileen Fisher', 'Ann Taylor', 'Talbots', 'Boden', 'White House Black Market', 'J.Crew', 'Banana Republic', 'COS', 'Uniqlo'],
+  },
+  man: {
+    '15–25': ['ASOS Men', 'H&M Men', 'Urban Outfitters Men', 'Zara Man', 'Pull&Bear', 'Nike', 'Adidas', 'Carhartt', 'Abercrombie Men', 'Represent', 'River Island Men'],
+    '26–35': ['ASOS Men', 'Zara Man', 'H&M Men', 'Nordstrom Men', 'Uniqlo', 'Abercrombie Men', 'Nike', 'Adidas', 'COS Men', 'Next Men', 'Reiss Men'],
+    '36–45': ['Nordstrom Men', 'Zara Man', 'COS Men', 'Uniqlo', 'Reiss Men', 'Banana Republic Men', 'J.Crew Men', 'Club Monaco Men', 'Ted Baker', 'Next Men'],
+    '46–55': ['Nordstrom Men', 'Uniqlo', 'Banana Republic Men', 'J.Crew Men', 'Reiss Men', 'Ted Baker', 'M&S Men', 'Next Men', 'Brooks Brothers', 'COS Men'],
+    '56–70': ['Nordstrom Men', 'M&S Men', 'Uniqlo', 'Banana Republic Men', 'J.Crew Men', 'Brooks Brothers', 'Boden Men', 'Ted Baker', 'Next Men', 'Marks & Spencer Men'],
+  },
+  nonbinary: {
+    '15–25': ['ASOS', 'Urban Outfitters', 'H&M', 'Zara', 'Weekday', 'Collusion', 'Arket', 'Pull&Bear', 'Nike', 'Carhartt', 'COS'],
+    '26–35': ['ASOS', 'COS', 'Uniqlo', 'Arket', 'Weekday', 'Zara', 'H&M', 'Nordstrom', 'Nike', '& Other Stories', 'Abercrombie'],
+    '36–45': ['COS', 'Uniqlo', 'Arket', 'Nordstrom', 'Banana Republic', 'J.Crew', 'Weekday', '& Other Stories', 'Club Monaco', 'Reiss'],
+    '46–55': ['COS', 'Uniqlo', 'Nordstrom', 'Banana Republic', 'J.Crew', 'Arket', 'M&S', 'Reiss', 'Boden', 'Ann Taylor'],
+    '56–70': ['Nordstrom', 'COS', 'Uniqlo', 'M&S', 'Banana Republic', 'J.Crew', 'Boden', 'Eileen Fisher', 'Arket', 'Ann Taylor'],
+  },
 };
+
+export function getRetailers(gender, ageRange) {
+  const byGender = RETAILERS[gender] || RETAILERS.woman;
+  return byGender[ageRange] || byGender['26–35'];
+}
