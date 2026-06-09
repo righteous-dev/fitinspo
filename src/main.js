@@ -1,15 +1,45 @@
 import './style.css';
-import { S, save, SKIN_TONES, BODY_TYPES } from './state.js';
+import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes } from './state.js';
 import { generateOutfits } from './api.js';
 import { renderBoards, createBoard } from './ui/boards.js';
 import { renderAlerts, updateAlertBadge } from './ui/alerts.js';
 import { renderOutfits } from './ui/outfits.js';
 import { toast } from './ui/toast.js';
 
+// ── GENDER SELECTOR ──────────────────────────────────────────────────────────
+const genderChipsEl = document.getElementById('genderChips');
+const genderChipsProfileEl = document.getElementById('genderChipsProfile');
+
+function buildGenderChips(container, chipClass) {
+  container.innerHTML = '';
+  GENDERS.forEach(g => {
+    const btn = document.createElement('button');
+    btn.className = chipClass + (S.gender === g.id ? ' active' : '');
+    btn.innerHTML = `<span class="gender-icon">${g.icon}</span>${g.label}`;
+    btn.addEventListener('click', () => {
+      S.gender = g.id;
+      // Reset body type when gender changes — old type may not exist in new list
+      S.bodyType = '';
+      save();
+      // Sync both gender chip sets
+      document.querySelectorAll('.' + chipClass).forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.' + chipClass).forEach(b => {
+        if (b.textContent.includes(g.label)) b.classList.add('active');
+      });
+      rebuildBodyChips();
+      refreshChips();
+      toast(`✓ Styling for ${g.label}`);
+    });
+    container.appendChild(btn);
+  });
+}
+
+buildGenderChips(genderChipsEl, 'gender-chip');
+buildGenderChips(genderChipsProfileEl, 'gender-chip');
+
 // ── AGE RANGES ───────────────────────────────────────────────────────────────
 const AGE_RANGES = ['15–25', '26–35', '36–45', '46–55', '56–70'];
 
-// Age chips on generate page
 const ageChipsEl = document.getElementById('ageChips');
 AGE_RANGES.forEach(range => {
   const btn = document.createElement('button');
@@ -20,12 +50,12 @@ AGE_RANGES.forEach(range => {
     save();
     ageChipsEl.querySelectorAll('.age-chip').forEach(c => c.classList.remove('active'));
     btn.classList.add('active');
+    syncAgeProfile(range);
     refreshChips();
   });
   ageChipsEl.appendChild(btn);
 });
 
-// Age range grid on profile page
 const ageRangeGrid = document.getElementById('ageRangeGrid');
 AGE_RANGES.forEach(range => {
   const btn = document.createElement('button');
@@ -36,18 +66,26 @@ AGE_RANGES.forEach(range => {
     save();
     ageRangeGrid.querySelectorAll('.age-range-btn').forEach(b => b.classList.remove('active'));
     btn.classList.add('active');
-    // sync generate page chips
-    ageChipsEl.querySelectorAll('.age-chip').forEach(c => {
-      c.classList.toggle('active', c.textContent === range);
-    });
+    syncAgeGenerate(range);
     refreshChips();
     toast(`✓ Styling for ages ${range}`);
   });
   ageRangeGrid.appendChild(btn);
 });
 
-// ── CHIP SETS PER AGE GROUP ──────────────────────────────────────────────────
-const CHIPS_BY_AGE = {
+function syncAgeProfile(range) {
+  ageRangeGrid.querySelectorAll('.age-range-btn').forEach(b => {
+    b.classList.toggle('active', b.textContent === range);
+  });
+}
+function syncAgeGenerate(range) {
+  ageChipsEl.querySelectorAll('.age-chip').forEach(c => {
+    c.classList.toggle('active', c.textContent === range);
+  });
+}
+
+// ── QUICK CHIPS PER AGE × GENDER ────────────────────────────────────────────
+const CHIPS_WOMAN = {
   '15–25': [
     ['☀️ Summer Night Out', 'cute going out look for summer'],
     ['✨ Y2K', 'Y2K streetwear look'],
@@ -55,7 +93,6 @@ const CHIPS_BY_AGE = {
     ['🖤 Dark Academia', 'dark academia fall layers'],
     ['💅 Mob Wife', 'mob wife glam going out'],
     ['🌸 Soft Girl', 'soft girl aesthetic pastel'],
-    ['🔥 Streetwear', 'trendy streetwear fit 2025'],
   ],
   '26–35': [
     ['💼 Office Chic', 'clean minimalist office fit 2025'],
@@ -64,7 +101,6 @@ const CHIPS_BY_AGE = {
     ['🌊 Coastal', 'coastal resort wear outfit'],
     ['🖤 Evening Out', 'sophisticated evening out look'],
     ['✈️ Travel Style', 'chic airport travel outfit'],
-    ['🎉 Cocktail', 'cocktail party outfit 2025'],
   ],
   '36–45': [
     ['💼 Power Dressing', 'powerful sophisticated work outfit'],
@@ -72,7 +108,6 @@ const CHIPS_BY_AGE = {
     ['🌿 Weekend Casual', 'stylish relaxed weekend look for 40s'],
     ['✈️ Vacation Ready', 'chic vacation resort outfit'],
     ['🖤 Evening Glam', 'polished evening glamour look'],
-    ['☀️ Summer Weekend', 'effortless summer weekend outfit'],
     ['🎨 Creative Office', 'creative professional office outfit'],
   ],
   '46–55': [
@@ -82,7 +117,6 @@ const CHIPS_BY_AGE = {
     ['☀️ Resort Wear', 'sophisticated resort vacation outfit'],
     ['🖤 Timeless Classic', 'timeless classic elegant look'],
     ['✈️ City Break', 'stylish city break travel outfit'],
-    ['🎨 Cultural Event', 'refined cultural event outfit'],
   ],
   '56–70': [
     ['💼 Refined Classic', 'refined classic elegant outfit for 60s'],
@@ -91,15 +125,83 @@ const CHIPS_BY_AGE = {
     ['☀️ Warm Weather', 'stylish comfortable warm weather outfit'],
     ['🖤 Sophisticated Evening', 'sophisticated evening out look for 60s'],
     ['🌊 Coastal Relaxed', 'chic relaxed coastal outfit'],
-    ['🎨 Arts & Culture', 'stylish arts gallery cultural outing outfit'],
   ],
 };
+
+const CHIPS_MAN = {
+  '15–25': [
+    ['🔥 Streetwear', 'trendy streetwear fit 2025'],
+    ['✨ Y2K Men', 'Y2K inspired mens streetwear look'],
+    ['🏀 Sporty', 'sporty athletic casual mens outfit'],
+    ['🖤 All Black', 'all black mens outfit'],
+    ['🌊 Coastal', 'coastal preppy mens summer outfit'],
+    ['👔 Smart Casual', 'smart casual mens going out look'],
+  ],
+  '26–35': [
+    ['💼 Business Casual', 'sharp mens business casual office outfit'],
+    ['🌿 Smart Weekend', 'stylish mens smart casual weekend look'],
+    ['✈️ Travel Style', 'mens airport travel outfit'],
+    ['🍸 Date Night', 'mens sharp date night outfit'],
+    ['🏋️ Athleisure', 'premium mens athleisure outfit'],
+    ['🎉 Night Out', 'mens stylish night out look'],
+  ],
+  '36–45': [
+    ['💼 Power Casual', 'polished mens business casual 40s'],
+    ['🌿 Relaxed Smart', 'mens relaxed smart casual weekend'],
+    ['✈️ City Break', 'stylish mens city break outfit'],
+    ['🎉 Evening Out', 'sophisticated mens evening outfit'],
+    ['🏡 Weekend Casual', 'mens stylish casual weekend look'],
+    ['👔 Creative Office', 'creative mens professional office outfit'],
+  ],
+  '46–55': [
+    ['💼 Executive', 'sharp mens executive professional outfit'],
+    ['🌿 Refined Casual', 'mens refined casual look for 50s'],
+    ['✈️ Travel', 'polished mens travel outfit'],
+    ['🎉 Special Occasion', 'mens elegant special occasion outfit'],
+    ['🖤 Classic Style', 'timeless classic mens outfit'],
+    ['🍸 Dinner', 'smart mens dinner out outfit'],
+  ],
+  '56–70': [
+    ['💼 Distinguished', 'distinguished classic mens outfit for 60s'],
+    ['🌿 Easy Style', 'easy elegant comfortable mens look'],
+    ['🎉 Occasion', 'mens celebratory occasion outfit'],
+    ['☀️ Warm Weather', 'comfortable stylish mens warm weather outfit'],
+    ['🖤 Classic Evening', 'classic sophisticated mens evening look'],
+    ['🌊 Relaxed', 'relaxed chic mens coastal outfit'],
+  ],
+};
+
+const CHIPS_NB = {
+  '15–25': [
+    ['✨ Androgynous', 'androgynous non-binary fashion forward look'],
+    ['🖤 Genderfluid', 'genderfluid dark alternative outfit'],
+    ['🌊 Coastal', 'gender-neutral coastal summer look'],
+    ['🔥 Streetwear', 'gender-neutral streetwear outfit'],
+    ['🌸 Soft Aesthetic', 'soft aesthetic gender-neutral pastel outfit'],
+    ['💫 Eclectic', 'eclectic non-binary maximalist look'],
+  ],
+  '26–35': [
+    ['💼 Office', 'gender-neutral professional office outfit'],
+    ['🌿 Smart Casual', 'gender-neutral smart casual everyday look'],
+    ['🎉 Evening Out', 'non-binary chic evening outfit'],
+    ['✈️ Travel', 'gender-neutral travel outfit'],
+    ['🖤 Minimalist', 'non-binary minimalist outfit'],
+    ['🌊 Weekend', 'relaxed gender-neutral weekend look'],
+  ],
+  '36–45': CHIPS_WOMAN['36–45'],
+  '46–55': CHIPS_WOMAN['46–55'],
+  '56–70': CHIPS_WOMAN['56–70'],
+};
+
+function getChips() {
+  const byGender = S.gender === 'man' ? CHIPS_MAN : S.gender === 'nonbinary' ? CHIPS_NB : CHIPS_WOMAN;
+  return byGender[S.ageRange] || byGender['26–35'];
+}
 
 function refreshChips() {
   const chipBar = document.getElementById('chipBar');
   chipBar.innerHTML = '';
-  const chips = CHIPS_BY_AGE[S.ageRange] || CHIPS_BY_AGE['26–35'];
-  chips.forEach(([label, prompt]) => {
+  getChips().forEach(([label, prompt]) => {
     const chip = document.createElement('div');
     chip.className = 'chip';
     chip.textContent = label;
@@ -111,20 +213,22 @@ function refreshChips() {
   });
 }
 
-// ── SKIN TONE SWATCHES ────────────────────────────────────────────────────────
-const skinSwatches = document.getElementById('skinSwatches');
+// ── SKIN TONE SWATCHES ───────────────────────────────────────────────────────
+const skinSwatchesEl = document.getElementById('skinSwatches');
 
 function updateAvatar() {
   const avatar = document.getElementById('profileAvatar');
   const skin = SKIN_TONES.find(t => t.id === S.skinTone);
+  const gender = GENDERS.find(g => g.id === S.gender);
+  const icon = S.gender === 'man' ? 'ti-man' : S.gender === 'nonbinary' ? 'ti-gender-bigender' : 'ti-woman';
   if (skin) {
     avatar.style.background = skin.color;
     avatar.style.borderColor = skin.color;
-    avatar.innerHTML = `<i class="ti ti-user" style="font-size:28px;color:rgba(0,0,0,0.4)"></i>`;
+    avatar.innerHTML = `<i class="ti ${icon}" style="font-size:28px;color:rgba(0,0,0,0.45)"></i>`;
   } else {
     avatar.style.background = 'rgba(212,254,1,.1)';
     avatar.style.borderColor = 'rgba(212,254,1,.3)';
-    avatar.innerHTML = `<i class="ti ti-user" style="font-size:28px"></i>`;
+    avatar.innerHTML = `<i class="ti ${icon}" style="font-size:28px"></i>`;
   }
 }
 
@@ -135,39 +239,41 @@ SKIN_TONES.forEach(tone => {
   swatch.title = tone.label;
   swatch.setAttribute('aria-label', tone.label);
   swatch.addEventListener('click', () => {
-    // Toggle off if already selected
     S.skinTone = S.skinTone === tone.id ? '' : tone.id;
     save();
-    skinSwatches.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
+    skinSwatchesEl.querySelectorAll('.skin-swatch').forEach(s => s.classList.remove('active'));
     if (S.skinTone) swatch.classList.add('active');
     updateAvatar();
     toast(S.skinTone ? `✓ Skin tone set to ${tone.label}` : 'Skin tone cleared');
   });
-  skinSwatches.appendChild(swatch);
+  skinSwatchesEl.appendChild(swatch);
 });
 
-// ── BODY TYPE CHIPS ───────────────────────────────────────────────────────────
+// ── BODY TYPE CHIPS ──────────────────────────────────────────────────────────
 const bodyChipsEl = document.getElementById('bodyChips');
 
-BODY_TYPES.forEach(type => {
-  const btn = document.createElement('button');
-  btn.className = 'body-chip' + (S.bodyType === type.id ? ' active' : '');
-  btn.textContent = type.label;
-  btn.addEventListener('click', () => {
-    // Toggle off if already selected
-    S.bodyType = S.bodyType === type.id ? '' : type.id;
-    save();
-    bodyChipsEl.querySelectorAll('.body-chip').forEach(b => b.classList.remove('active'));
-    if (S.bodyType) btn.classList.add('active');
-    toast(S.bodyType ? `✓ Body type set to ${type.label}` : 'Body type cleared');
+function rebuildBodyChips() {
+  bodyChipsEl.innerHTML = '';
+  getBodyTypes(S.gender).forEach(type => {
+    const btn = document.createElement('button');
+    btn.className = 'body-chip' + (S.bodyType === type.id ? ' active' : '');
+    btn.textContent = type.label;
+    btn.addEventListener('click', () => {
+      S.bodyType = S.bodyType === type.id ? '' : type.id;
+      save();
+      bodyChipsEl.querySelectorAll('.body-chip').forEach(b => b.classList.remove('active'));
+      if (S.bodyType) btn.classList.add('active');
+      updateAvatar();
+      toast(S.bodyType ? `✓ Body type set to ${type.label}` : 'Body type cleared');
+    });
+    bodyChipsEl.appendChild(btn);
   });
-  bodyChipsEl.appendChild(btn);
-});
+}
+rebuildBodyChips();
 
 // ── ZIP CODE ─────────────────────────────────────────────────────────────────
 const zipInput = document.getElementById('zipInput');
 const zipStatus = document.getElementById('zipStatus');
-
 zipInput.value = S.zipCode;
 updateZipStatus();
 
@@ -205,10 +311,7 @@ storeSheetOverlay.addEventListener('click', closeStoreSheet);
 export function openStoreSheet(brand, itemName) {
   const zip = S.zipCode;
   sheetZipRow.style.display = zip ? 'none' : 'flex';
-
-  const mapsQuery = zip
-    ? `${brand} near ${zip}`
-    : `${brand} store`;
+  const mapsQuery = zip ? `${brand} near ${zip}` : `${brand} store`;
   const mapsUrl = `https://www.google.com/maps/search/${encodeURIComponent(mapsQuery)}`;
   const yelpUrl = `https://www.yelp.com/search?find_desc=${encodeURIComponent(brand)}&find_loc=${encodeURIComponent(zip || '')}`;
 
@@ -252,7 +355,6 @@ export function openStoreSheet(brand, itemName) {
       <p>Add your zip in <strong>Profile</strong> for more precise results</p>
     </div>` : ''}
   `;
-
   storeSheet.classList.add('open');
   storeSheetOverlay.classList.add('open');
 }
@@ -268,8 +370,8 @@ window.goTab = function(tab) {
   document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
   document.getElementById('page-' + tab).classList.add('active');
   document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'boards') renderBoards();
-  if (tab === 'alerts') renderAlerts();
+  if (tab === 'boards')  renderBoards();
+  if (tab === 'alerts')  renderAlerts();
   if (tab === 'profile') updateStats();
 };
 
@@ -288,12 +390,12 @@ document.getElementById('imgInput').addEventListener('change', e => {
   reader.readAsDataURL(file);
 });
 
-// ── GENERATE ──────────────────────────────────────────────────────────────────
+// ── GENERATE ─────────────────────────────────────────────────────────────────
 const LOAD_STEPS = [
   'Analyzing 2025 trends...',
   'Curating looks for your style...',
-  'Searching ASOS, Zara, H&M...',
-  'Checking Revolve, Nordstrom...',
+  'Searching retailers...',
+  'Checking prices & availability...',
   'Styling your complete looks...',
 ];
 
@@ -315,11 +417,9 @@ async function generate() {
   }, 1600);
 
   try {
-    const result = await generateOutfits(prompt, S.ageRange);
-
+    const result = await generateOutfits(prompt, S.ageRange, S.gender);
     clearInterval(stepTimer);
     document.getElementById('loader').classList.remove('show');
-
     S.totalGen += result.outfits.length;
 
     if (result.trendNote) {
@@ -331,7 +431,6 @@ async function generate() {
     renderOutfits(result.outfits);
     document.getElementById('resultsArea').style.display = 'block';
     document.getElementById('resultsArea').scrollIntoView({ behavior: 'smooth', block: 'start' });
-
   } catch (err) {
     clearInterval(stepTimer);
     document.getElementById('loader').classList.remove('show');
@@ -339,7 +438,6 @@ async function generate() {
     eb.textContent = '⚠️ ' + (err.message || 'Something went wrong. Try again.');
     eb.classList.add('show');
   }
-
   btn.disabled = false;
 }
 
@@ -348,12 +446,12 @@ document.getElementById('promptIn').addEventListener('keydown', e => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); generate(); }
 });
 
-// ── BOARDS BUTTON ─────────────────────────────────────────────────────────────
+// ── BOARDS ────────────────────────────────────────────────────────────────────
 document.getElementById('newBoardBtn').addEventListener('click', createBoard);
 
-// ── PROFILE STATS ──────────────────────────────────────────────────────────────
+// ── PROFILE STATS ─────────────────────────────────────────────────────────────
 function updateStats() {
-  document.getElementById('statGen').textContent = S.totalGen;
+  document.getElementById('statGen').textContent    = S.totalGen;
   document.getElementById('statBoards').textContent = S.boards.length;
   document.getElementById('statAlerts').textContent = S.alerts.length;
 }

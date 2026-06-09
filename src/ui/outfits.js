@@ -3,7 +3,7 @@ import { saveToBoard } from './boards.js';
 import { toast } from './toast.js';
 import { generateImage } from '../api.js';
 import { openStoreSheet } from '../main.js';
-import { S, SKIN_TONES, BODY_TYPES } from '../state.js';
+import { S, SKIN_TONES, getBodyTypes } from '../state.js';
 
 function escH(s) {
   return (s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
@@ -135,7 +135,7 @@ function loadImage(outfit, colors) {
   chips.forEach(c => c.disabled = true);
 
   const skinPrompt = SKIN_TONES.find(t => t.id === S.skinTone)?.prompt || null;
-  const bodyPrompt = BODY_TYPES.find(t => t.id === S.bodyType)?.prompt || null;
+  const bodyPrompt = getBodyTypes(S.gender).find(t => t.id === S.bodyType)?.prompt || null;
 
   generateImage(outfit.imagePrompt, colors, skinPrompt, bodyPrompt)
     .then(base64 => {
