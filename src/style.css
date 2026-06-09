@@ -36,6 +36,12 @@ html,body{height:100%;background:var(--bg);color:var(--text);font-family:'Outfit
 .gender-chip.active,.gender-chip-profile.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent);font-weight:600}
 .gender-icon{font-size:12px}
 
+/* BUDGET CHIPS */
+.budget-chips,.budget-chips-profile{display:flex;gap:5px;flex-wrap:wrap}
+.budget-chip{font-size:11px;padding:4px 11px;border-radius:999px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;white-space:nowrap}
+.budget-chip:hover{border-color:rgba(212,254,1,.35);color:rgba(212,254,1,.8)}
+.budget-chip.active{background:var(--accent);color:#0a0a0a;border-color:var(--accent);font-weight:600}
+
 /* AGE CHIPS */
 .age-chips{display:flex;gap:5px;flex-wrap:wrap}
 .age-chip{font-size:11px;padding:4px 11px;border-radius:999px;border:0.5px solid var(--border);background:transparent;color:var(--muted);cursor:pointer;font-family:'Outfit',sans-serif;transition:all .15s;white-space:nowrap}

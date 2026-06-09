@@ -1,5 +1,5 @@
 import './style.css';
-import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes } from './state.js';
+import { S, save, GENDERS, SKIN_TONES, BODY_TYPES_WOMAN, getBodyTypes, BUDGET_TIERS } from './state.js';
 import { generateOutfits } from './api.js';
 import { renderBoards, createBoard } from './ui/boards.js';
 import { renderAlerts, updateAlertBadge } from './ui/alerts.js';
@@ -271,6 +271,29 @@ function rebuildBodyChips() {
 }
 rebuildBodyChips();
 
+// ── BUDGET CHIPS ─────────────────────────────────────────────────────────────
+function buildBudgetChips(container, chipClass) {
+  container.innerHTML = '';
+  BUDGET_TIERS.forEach(tier => {
+    const btn = document.createElement('button');
+    btn.className = chipClass + (S.budget === tier.id ? ' active' : '');
+    btn.textContent = tier.label;
+    btn.addEventListener('click', () => {
+      S.budget = tier.id;
+      save();
+      document.querySelectorAll('.' + chipClass).forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.' + chipClass).forEach(b => {
+        if (b.textContent === tier.label) b.classList.add('active');
+      });
+      if (tier.id !== 'any') toast(`✓ Budget set to ${tier.label}`);
+    });
+    container.appendChild(btn);
+  });
+}
+
+buildBudgetChips(document.getElementById('budgetChips'), 'budget-chip');
+buildBudgetChips(document.getElementById('budgetChipsProfile'), 'budget-chip');
+
 // ── ZIP CODE ─────────────────────────────────────────────────────────────────
 const zipInput = document.getElementById('zipInput');
 const zipStatus = document.getElementById('zipStatus');
@@ -417,7 +440,7 @@ async function generate() {
   }, 1600);
 
   try {
-    const result = await generateOutfits(prompt, S.ageRange, S.gender);
+    const result = await generateOutfits(prompt, S.ageRange, S.gender, S.budget);
     clearInterval(stepTimer);
     document.getElementById('loader').classList.remove('show');
     S.totalGen += result.outfits.length;

@@ -1,7 +1,7 @@
 // In dev mode, calls Anthropic directly (requires VITE_ANTHROPIC_KEY env var).
 // In production, calls /api/* on the Cloudflare Pages Functions proxy.
 
-import { getRetailers } from './state.js';
+import { getRetailers, BUDGET_TIERS } from './state.js';
 
 // Age descriptors — must stay in sync with functions/api/image.js
 const AGE_DESCRIPTORS = {
@@ -63,7 +63,7 @@ Return 2-3 outfits with 4-5 items each. Mix price points. Use realistic 2025 pri
 
 let _outfitCounter = 0;
 
-export async function generateOutfits(prompt, ageRange = '26–35', gender = 'woman') {
+export async function generateOutfits(prompt, ageRange = '26–35', gender = 'woman', budget = 'any') {
   const isLocal = import.meta.env.DEV;
 
   if (isLocal) {
@@ -78,7 +78,7 @@ export async function generateOutfits(prompt, ageRange = '26–35', gender = 'wo
         'anthropic-version': '2023-06-01',
         'anthropic-dangerous-direct-browser-access': 'true',
       },
-      body: JSON.stringify(buildPayload(prompt, ageRange, gender)),
+      body: JSON.stringify(buildPayload(prompt, ageRange, gender, budget)),
     });
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
@@ -90,7 +90,7 @@ export async function generateOutfits(prompt, ageRange = '26–35', gender = 'wo
   const res = await fetch('/api/generate', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ prompt, ageRange, gender }),
+    body: JSON.stringify({ prompt, ageRange, gender, budget }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));
@@ -112,14 +112,16 @@ export async function generateImage(imagePrompt, colors, skinTonePrompt, bodyTyp
   return (await res.json()).image;
 }
 
-function buildPayload(prompt, ageRange, gender) {
+function buildPayload(prompt, ageRange, gender, budget) {
+  const budgetTier = BUDGET_TIERS.find(t => t.id === budget);
+  const budgetInstruction = budgetTier?.prompt || '';
   return {
     model: 'claude-sonnet-4-6',
     max_tokens: 4000,
     system: buildSystemPrompt(gender, ageRange),
     messages: [{
       role: 'user',
-      content: `Create complete outfit suggestions for: "${prompt}". Style specifically for a ${gender} aged ${ageRange} — use age-appropriate silhouettes, trends and styling that feel authentic to that life stage. Mix different retailers and price points. Include vivid imagePrompt and colorPalettes for each outfit.`,
+      content: `Create complete outfit suggestions for: "${prompt}". Style specifically for a ${gender} aged ${ageRange} — use age-appropriate silhouettes, trends and styling. ${budgetInstruction} Mix different retailers from the approved list. Include vivid imagePrompt and colorPalettes for each outfit.`,
     }],
   };
 }

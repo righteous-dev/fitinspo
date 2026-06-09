@@ -7,6 +7,7 @@ const KEY = {
   skinTone: 'fitinspo_skin',
   bodyType: 'fitinspo_body',
   gender:   'fitinspo_gender',
+  budget:   'fitinspo_budget',
 };
 
 const DEFAULT_BOARDS = [
@@ -23,6 +24,7 @@ export const S = {
   skinTone: localStorage.getItem(KEY.skinTone) || '',
   bodyType: localStorage.getItem(KEY.bodyType) || '',
   gender:   localStorage.getItem(KEY.gender)   || 'woman',
+  budget:   localStorage.getItem(KEY.budget)   || 'any',
 };
 
 export function save() {
@@ -34,7 +36,17 @@ export function save() {
   localStorage.setItem(KEY.skinTone, S.skinTone);
   localStorage.setItem(KEY.bodyType, S.bodyType);
   localStorage.setItem(KEY.gender,   S.gender);
+  localStorage.setItem(KEY.budget,   S.budget);
 }
+
+// Budget tiers
+export const BUDGET_TIERS = [
+  { id: 'thrifty',  label: '💸 Under $75',  prompt: 'Total outfit budget is under $75. Every item must be budget-friendly and affordable. Keep individual item prices low, mostly under $25 each.' },
+  { id: 'everyday', label: '🛍 $75–$200',   prompt: 'Total outfit budget is $75–$200. Mix affordable and mid-range pieces. Keep individual items mostly under $60.' },
+  { id: 'premium',  label: '✨ $200–$400',  prompt: 'Total outfit budget is $200–$400. Mix mid-range and some premium pieces. Individual items can go up to $120.' },
+  { id: 'luxury',   label: '💎 $400+',      prompt: 'This is a luxury outfit — no strict budget. Use premium and designer-adjacent pieces. Quality over price.' },
+  { id: 'any',      label: '🔓 No limit',   prompt: '' },
+];
 
 // Gender options
 export const GENDERS = [

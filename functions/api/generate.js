@@ -106,20 +106,28 @@ IMPORTANT: The imagePrompt must be a vivid detailed Stable Diffusion prompt. Rep
 Return 2-3 outfits with 4-5 items each. Mix price points from the approved retailer list only. Use realistic 2025 prices.`;
 }
 
-const VALID_GENDERS    = ['woman', 'man', 'nonbinary'];
-// Normalise age range — replace any dash variant with en-dash so keys match RETAILERS object
+const VALID_GENDERS = ['woman', 'man', 'nonbinary'];
+
 function normaliseAge(raw) {
-  const normalised = (raw || '').replace(/[-‒–—]/g, '–');
-  const valid = ['15–25', '26–35', '36–45', '46–55', '56–70'];
-  return valid.includes(normalised) ? normalised : '26–35';
+  const n = (raw || '').replace(/[-‒–—]/g, '–');
+  return ['15–25','26–35','36–45','46–55','56–70'].includes(n) ? n : '26–35';
 }
+
+// Budget tiers — must stay in sync with src/state.js
+const BUDGET_TIERS = {
+  thrifty:  'Total outfit budget is under $75. Every item must be budget-friendly and affordable. Keep individual item prices low, mostly under $25 each.',
+  everyday: 'Total outfit budget is $75–$200. Mix affordable and mid-range pieces. Keep individual items mostly under $60.',
+  premium:  'Total outfit budget is $200–$400. Mix mid-range and some premium pieces. Individual items can go up to $120.',
+  luxury:   'This is a luxury outfit — no strict budget. Use premium and designer-adjacent pieces. Quality over price.',
+  any:      '',
+};
 
 export async function onRequestPost({ request, env }) {
   let body;
   try { body = await request.json(); }
   catch { return jsonError('Invalid JSON', 400); }
 
-  const { prompt, ageRange, gender } = body;
+  const { prompt, ageRange, gender, budget } = body;
   if (!prompt || typeof prompt !== 'string' || !prompt.trim()) return jsonError('prompt is required', 400);
   if (prompt.length > 500) return jsonError('prompt too long', 400);
 
@@ -142,7 +150,7 @@ export async function onRequestPost({ request, env }) {
       system: buildSystemPrompt(gen, age),
       messages: [{
         role: 'user',
-        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Mix price points within the approved list. Include vivid imagePrompt and colorPalettes for each outfit.`,
+        content: `Create complete outfit suggestions for: "${prompt.trim()}". Style specifically for a ${gen} aged ${age} — use age-appropriate silhouettes, trends and styling. ${BUDGET_TIERS[budget] || ''} IMPORTANT: Every item must come from the approved retailer list in the system prompt. Do not suggest any other stores. Include vivid imagePrompt and colorPalettes for each outfit.`,
       }],
     }),
   });
