@@ -137,7 +137,7 @@ function loadImage(outfit, colors) {
   const skinPrompt = SKIN_TONES.find(t => t.id === S.skinTone)?.prompt || null;
   const bodyPrompt = getBodyTypes(S.gender).find(t => t.id === S.bodyType)?.prompt || null;
 
-  generateImage(outfit.imagePrompt, colors, skinPrompt, bodyPrompt)
+  generateImage(outfit.imagePrompt, colors, skinPrompt, bodyPrompt, S.ageRange, S.gender)
     .then(base64 => {
       img.src = `data:image/jpeg;base64,${base64}`;
       img.onload = () => {

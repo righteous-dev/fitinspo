@@ -3,15 +3,23 @@
 
 import { getRetailers } from './state.js';
 
-// System prompt template — retailers and model word injected per request
+// Age descriptors — must stay in sync with functions/api/image.js
+const AGE_DESCRIPTORS = {
+  woman:    { '15–25':'stylish 20-year-old woman',      '26–35':'stylish woman in her early thirties', '36–45':'stylish woman in her early forties',  '46–55':'stylish woman in her early fifties',  '56–70':'stylish woman in her early sixties' },
+  man:      { '15–25':'stylish 20-year-old man',        '26–35':'stylish man in his early thirties',   '36–45':'stylish man in his early forties',    '46–55':'stylish man in his early fifties',    '56–70':'stylish man in his early sixties' },
+  nonbinary:{ '15–25':'stylish 20-year-old person',     '26–35':'stylish person in their early thirties','36–45':'stylish person in their early forties','46–55':'stylish person in their early fifties','56–70':'stylish person in their early sixties' },
+};
+
+function getAgeDesc(gender, ageRange) {
+  const byGender = AGE_DESCRIPTORS[gender] || AGE_DESCRIPTORS.woman;
+  return byGender[ageRange] || byGender['26–35'];
+}
+
+// System prompt template — retailers and model description injected per request
 function buildSystemPrompt(gender, ageRange) {
   const retailers = getRetailers(gender, ageRange);
-  const modelWord = gender === 'man' ? 'man' : gender === 'nonbinary' ? 'person' : 'woman';
-  const modelDesc = gender === 'man'
-    ? 'A professional fashion editorial photo of a stylish young man wearing'
-    : gender === 'nonbinary'
-    ? 'A professional fashion editorial photo of a stylish young person wearing'
-    : 'A professional fashion editorial photo of a stylish young woman wearing';
+  const ageDesc = getAgeDesc(gender, ageRange);
+  const modelDesc = `A professional fashion editorial photo of a ${ageDesc} wearing`;
 
   return `You are an expert fashion stylist with deep knowledge of 2025 trends.
 
@@ -91,11 +99,11 @@ export async function generateOutfits(prompt, ageRange = '26–35', gender = 'wo
   return assignIds(await res.json());
 }
 
-export async function generateImage(imagePrompt, colors, skinTonePrompt, bodyTypePrompt) {
+export async function generateImage(imagePrompt, colors, skinTonePrompt, bodyTypePrompt, ageRange, gender) {
   const res = await fetch('/api/image', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ imagePrompt, colors, skinTonePrompt, bodyTypePrompt }),
+    body: JSON.stringify({ imagePrompt, colors, skinTonePrompt, bodyTypePrompt, ageRange, gender }),
   });
   if (!res.ok) {
     const err = await res.json().catch(() => ({}));

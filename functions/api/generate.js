@@ -30,13 +30,40 @@ function getRetailers(gender, ageRange) {
   return byGender[ageRange] || byGender['26–35'];
 }
 
+// Age descriptors for Flux image prompts — specific ages produce more consistent results
+const AGE_DESCRIPTORS = {
+  woman: {
+    '15–25': 'stylish 20-year-old woman',
+    '26–35': 'stylish woman in her early thirties',
+    '36–45': 'stylish woman in her early forties',
+    '46–55': 'stylish woman in her early fifties',
+    '56–70': 'stylish woman in her early sixties',
+  },
+  man: {
+    '15–25': 'stylish 20-year-old man',
+    '26–35': 'stylish man in his early thirties',
+    '36–45': 'stylish man in his early forties',
+    '46–55': 'stylish man in his early fifties',
+    '56–70': 'stylish man in his early sixties',
+  },
+  nonbinary: {
+    '15–25': 'stylish 20-year-old person',
+    '26–35': 'stylish person in their early thirties',
+    '36–45': 'stylish person in their early forties',
+    '46–55': 'stylish person in their early fifties',
+    '56–70': 'stylish person in their early sixties',
+  },
+};
+
+function getAgeDescriptor(gender, ageRange) {
+  const byGender = AGE_DESCRIPTORS[gender] || AGE_DESCRIPTORS.woman;
+  return byGender[ageRange] || byGender['26–35'];
+}
+
 function buildSystemPrompt(gender, ageRange) {
   const retailers = getRetailers(gender, ageRange);
-  const modelDesc = gender === 'man'
-    ? 'A professional fashion editorial photo of a stylish young man wearing'
-    : gender === 'nonbinary'
-    ? 'A professional fashion editorial photo of a stylish young person wearing'
-    : 'A professional fashion editorial photo of a stylish young woman wearing';
+  const ageDesc = getAgeDescriptor(gender, ageRange);
+  const modelDesc = `A professional fashion editorial photo of a ${ageDesc} wearing`;
 
   return `You are an expert fashion stylist with deep knowledge of 2025 trends.
 
